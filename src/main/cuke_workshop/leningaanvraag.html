@@ -1,0 +1,265 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+</head>
+<body ng-app="bdd" ng-init="page=1;minlening={'Flitskrediet':300,'Persoonlijk':1500, 'Doorlopend':2500, 'Autolening':2000, 'WOZ-krediet':10000, 'Hypotheek':50000}">
+<div ng-controller="MainCtrl" class="container">
+  <div ng-hide="page!=1">
+    <h1 id="aanvraagscherm">Aanvraagscherm</h1>
+    <h3 id="waarvoorlenen">Waarvoor hebt u een lening nodig?</h3>
+    <button ng-click="toggleModal('U kunt wellicht beter geen lening nemen als deze enkel voor boodschappen bedoeld is.')" class="btn btn-default" id="boodschappen">Boodschappen</button>
+    <button ng-click="toggleModal('U kunt wellicht beter geen lening nemen als deze enkel voor beleggingen bedoeld is.')" class="btn btn-default" id="beleggingen">Beleggingen</button>
+    <button ng-click="toggleModal('Waarschijnlijk is een Doorlopend krediet of een Persoonlijke lening de beste keus voor u.')" class="btn btn-default" id="rekeningen">Rekeningen betalen</button>
+    <button ng-click="toggleModal('Waarschijnlijk is een Flitskrediet of een Persoonlijke lening de beste keus voor u.')" class="btn btn-default" id="meubels">Meubels</button>
+    <button ng-click="toggleModal('Voor de aankoop van een auto is de Autolening de beste keus.')" class="btn btn-default" id="autoaankoop">Auto</button>
+    <button ng-click="toggleModal('Bij een verbouwing aan een huis is een Persoonlijke lening, Doorlopend krediet of WOZ-krediet de beste keus.')" class="btn btn-default" id="verbouwing">Verbouwing</button>
+    <button ng-click="toggleModal('Voor een huis is een Hypotheek de beste keus qua lening.')" class="btn btn-default" id="huis">Huis</button>
+    <h3 id="watvoorlening">Wat voor lening wilt u?</h3>
+    <form role="form" name="myform" novalidate>
+      <div class="form-group">
+        <td><input type="radio" name="typelening" value="Flitskrediet" id="flits" required ng-model="typelening"/>
+          <label for="flits">Flitskrediet (minimaal 300 euro)</label><br/>
+        <td><input type="radio" name="typelening" value="Persoonlijk" id="pers" ng-model="typelening"/>
+          <label for="pers">Persoonlijke lening (minimaal 1.500 euro) </label><br/>
+        <td><input type="radio" name="typelening" value="Doorlopend" id="door" ng-model="typelening"/>
+          <label for="door">Doorlopend krediet (minimaal 2.500 euro)</label><br/>
+        <td><input type="radio" name="typelening" value="Autolening" id="auto" ng-model="typelening"/>
+          <label for="auto">Autolening (minimaal 2.000 euro)</label><br/>
+        <td><input type="radio" name="typelening" value="WOZ-krediet" id="woz" ng-model="typelening"/>
+          <label for="woz">WOZ-krediet (minimaal 10.000 euro)</label><br/>
+        <td><input type="radio" name="typelening" value="Hypotheek" id="hypo" ng-model="typelening"/>
+          <label for="hypo">Hypotheek (minimaal 50.000 euro)</label><br/>
+      </div>
+      <h3 id="hoeveellenen">Hoeveel wilt u lenen?</h3>
+      <div class="form-group">
+        <label for="amount">Te lenen bedrag</label>
+        <td><input type="number" min="0" max="1000000" name="amount" id="amount" placeholder="Leenbedrag in euro's" ng-model="amount"/>
+          <span ng-show="myform.amount.$dirty && amount<minlening[typelening]" class="alert-danger" id="minleningtekst">De hoogte van de gewenste lening is lager dan het minimale bedrag ({{minlening[typelening]}}) van de geselecteerde lening. Kies eventueel een ander type lening.</span>
+      </div>
+
+      <button class="btn btn-default" ng-disabled="typelening==null || amount==null || amount<minlening[typelening]" ng-click="page='2';submit()" id="verderPage1">Ga verder naar toelichting</button>
+    </form>
+
+    <modal title="Tip" visible="showModal">
+      <form role="form">
+        <div class="form-group">
+          <p id="tiptekst">{{ tekst }}</p>
+        </div>
+      </form>
+    </modal>
+  </div>
+
+  <div ng-hide="page!=2">
+    <h2 id="toelichtingscherm">Toelichting leningen</h2>
+    <table>
+      <tr><td>Gekozen lening: </td><td id="gekozen_typelening">{{typelening}}<td></tr>
+      <tr><td>Te lenen bedrag (euro): </td><td id="gekozen_amount">{{amount}}<td></tr>
+    </table>
+    <form role="form" name="form2" novalidate>
+      <div class="form-group">
+        <input type="radio" name="kennis" value="ja" id="ja" ng-model="kennis"/>
+        <label for="ja">Ik heb kennis en ervaring met lenen.</label><br/>
+        <input type="radio" name="kennis" value="nee" id="nee" ng-model="kennis"/>
+        <label for="nee">Ik heb geen kennis of ervaring met lenen.</label><br/>
+      </div>
+    </form>
+    <div ng-hide="kennis!='nee'" id="leningtoelichting">
+      Het is niet in alle gevallen voordelig om een lening af te sluiten. Kijk goed bij de nieuwe lening welke voorwaarden en rente van toepassing is. Let er ook op hoe lang de rente geldig is die jou wordt aangeboden. Soms geldt een rente slechts voor een beperkte tijd. Verder kunnen de maandlasten van een lening lager lijken, omdat minder of helemaal niet meer wordt afgelost op de lening. De lening moet dan wel in de toekomst worden afgelost, terwijl dat misschien niet goed uitkomt. Bijvoorbeeld omdat er minder inkomsten zijn door pensionering. Denk rustig na over het aanbod en vraag uitleg als je iets niet begrijpt.
+      <p/>
+    </div>
+    <button class="btn btn-default" ng-click="page='1';submit()" id="terugPage2">Ga terug naar aanvraag</button>
+    <button class="btn btn-default" ng-click="page='3'" ng-disabled="kennis==null" id="verderPage2">Ga verder naar persoonsgegevens</button>
+  </div>
+
+  <div ng-hide="page!=3">
+    <h2 id="persoonsgegevens">Persoonlijke gegevens</h2>
+    <form role="form" name="form3">
+      <div class="form-group">
+        <table>
+          <tr>
+            <td><label for="naam">naam</label></td>
+            <td><input type="text" name="naam" id="naam" placeholder="uw naam" ng-model="naam" required/></td><td><span ng-show = "form3.naam.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td>geslacht</td>
+            <td><input type="radio" name="geslacht" id="man" value="man" ng-model="geslacht" required/>
+              <label for="man">man</label><br/>
+              <input type="radio" name="geslacht" id="vrouw" value="vrouw" ng-model="geslacht" required/>
+              <label for="vrouw">vrouw</label>  </td><td><span ng-show = "form3.geslacht.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="geboortedatum">geboortedatum</label></td>
+            <td><input type="date" name="geboortedatum" id="geboortedatum" placeholder="uw geboortedatum" ng-model="geboortedatum" required/> </td><td><span ng-show = "form3.geboortedatum.$error.required && showErrors">Verplicht</span><span ng-show = "form3.geboortedatum.$dirty && (age(geboortedatum)<18 || age(geboortedatum)>65)">Leeftijd moet tussen 18 en 65 liggen</span></td></tr>
+          <tr><td><label for="adres">adres</label></td>
+            <td><input type="text" name="adres" id="adres" placeholder="uw adres" ng-model="adres" required/> </td><td><span ng-show = "form3.adres.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="telefoonnummer">telefoonnummer</label></td>
+            <td><input type="text" name="telefoonnummer" id="telefoonnummer" placeholder="uw telefoonnummer" ng-model="telefoonnummer" required/> </td><td><span ng-show = "form3.telefoonnummer.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="kinderen">kinderen < 21</label></td>
+            <td><input type="number" name="kinderen" id="kinderen" placeholder="aantal" ng-model="kinderen" required/>    </td><td><span ng-show = "form3.kinderen.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="rekeningnummer">rekeningnummer</label></td>
+            <td><input type="text" name="rekeningnummer" id="rekeningnummer" placeholder="uw rekeningnummer" ng-model="rekeningnummer" required/>   </td><td><span ng-show = "form3.rekeningnummer.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="indiensttreding">datum indiensttreding</label></td>
+            <td><input type="date" name="indiensttreding" id="indiensttreding" placeholder="uw datum indiensttreding" ng-model="indiensttreding" required/>  </td><td><span ng-show = "form3.indiensttreding.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="inkomen">bruto inkomen</label></td>
+            <td><input type="number" name="inkomen" id="inkomen" placeholder="uw bruto inkomen" ng-model="inkomen" required/>   </td><td><span ng-show = "form3.inkomen.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for="woonlasten">woonlasten</label></td>
+            <td><input type="number" name="woonlasten" id="woonlasten" placeholder="uw woonlasten" ng-model="woonlasten" required/>  </td><td><span ng-show = "form3.woonlasten.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for"woonsituatie">woonsituatie</label></td>
+            <td><select name="woonsituatie" ng-model="woonsituatie" id="woonsituatie" required>
+              <option value="koophuis">koophuis</option>
+              <option value="huurhuis">huurhuis</option>
+              <option value="inwonend">inwonend</option>
+            </select></td><td><span ng-show = "form3.woonsituatie.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for"staat">burgerlijke staat</label></td>
+            <td><select name="staat" ng-model="staat" id="staat" required>
+              <option value="single">single</option>
+              <option value="getrouwd">getrouwd</option>
+              <option value="samenwonend">samenwonend</option>
+              <option value="partner">geregistreerd partnerschap</option>
+            </select></td><td><span ng-show = "form3.staat.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr ng-show="staat=='getrouwd'"><td></td>
+            <td><input type="checkbox" name="samen" id="samen" value="j" ng-model="samen" />
+              <label for="samen">Ik wil samen met mijn partner lenen</label>  </td><td></td></tr>
+
+          <tr ng-show="samen">
+            <td><label for="naam">naam partner</label></td>
+            <td><input type="text" name="naampartner" id="naampartner" placeholder="uw partners naam" ng-model="naampartner" /></td><td><span ng-show = "samen && form3.naampartner.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr ng-show="samen"><td>geslacht partner</td>
+            <td><input type="radio" name="geslachtpartner" id="partnerman" value="man" ng-model="geslachtpartner" />
+              <label for="partnerman">man</label><br/>
+              <input type="radio" name="geslachtpartner" id="partnervrouw" value="vrouw" ng-model="geslachtpartner" />
+              <label for="partnervrouw">vrouw</label>  </td><td><span ng-show = "form3.geslachtpartner.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr ng-show="samen"><td><label for="geboortedatum">geboortedatum partner</label></td>
+            <td><input type="date" name="geboortedatumpartner" id="geboortedatumpartner" placeholder="uw partners geboortedatum" ng-model="geboortedatumpartner" /> </td><td><span ng-show = "form3.geboortedatumpartner.$error.required && showErrors">Verplicht</span><span ng-show = "form3.geboortedatumpartner.$dirty && (age(geboortedatumpartner)<18 || age(geboortedatumpartner)>65)">Leeftijd moet tussen 18 en 65 liggen</span></td></tr>
+
+          <tr><td><label for"typeinkomen">type inkomen</label></td>
+            <td><select name="typeinkomen" ng-model="typeinkomen" id="typeinkomen" required>
+              <option value="tijdelijk">tijdelijk</option>
+              <option value="vast">vast</option>
+              <option value="zelfstandig">zelfstandig</option>
+              <option value="uitzendkracht">uitzendkracht</option>
+              <option value="geen">geen inkomen</option>
+            </select> </td><td><span ng-show = "form3.typeinkomen.$error.required && showErrors">Verplicht</span></td></tr>
+          <tr><td><label for"loonstrookje ">loonstrookje</label></td><td><input type="file" name="loonstrookje" accept="application/pdf,image/*"/></td></tr>
+          <tr><td><label for"id ">identiteitsbewijs</label></td><td><input type="file" name="id" accept="application/pdf,image/*"/></td></tr>
+          <tr ng-show="typeinkomen=='tijdelijk'||typeinkomen=='uitzendkracht'"><td><label for"intentieverklaring">intentieverklaring</label></td><td><input type="file" name="intentieverklaring" accept="application/pdf,image/*"/></td></tr>
+        </table>
+
+        <button class="btn btn-default" ng-click="page='2'" id="terugPage3">Ga terug naar toelichting</button>
+        <button class="btn btn-default" ng-click="form3.$valid ? page='4' : showErrors=form3.$error" id="verderPage3">Verstuur lening aanvraag</button>
+
+      </div>
+  </div>
+
+  <div ng-hide="page!=4">
+    <h2 id="ingevuldegegevens">Ingevulde gegevens</h2>
+    <table>
+      <tr><td>Gekozen lening: </td><td id="result_typelening">{{typelening}}<td></tr>
+      <tr><td>Te lenen bedrag (euro): </td><td id="result_amount">{{amount}}<td></tr>
+      <tr><td>Naam: </td><td id="result_naam">{{naam}}<td></tr>
+      <tr><td>Geslacht: </td><td id="result_geslacht">{{geslacht}}<td></tr>
+      <tr><td>Geboortedatum: </td><td id="result_geboortedatum">{{geboortedatum  | date:'dd-MM-yyyy'}}<td></tr>
+      <tr><td>Adres: </td><td id="result_adres">{{adres}}<td></tr>
+      <tr><td>Telefoonnummer: </td><td id="result_telefoonnummer">{{telefoonnummer}}<td></tr>
+      <tr><td>Aantal kinderen onder 21 jaar: </td><td id="result_kinderen">{{kinderen}}<td></tr>
+      <tr><td>Rekeningnummer: </td><td id="result_rekeningnummer">{{rekeningnummer}}<td></tr>
+      <tr><td>Datum indiensttreding: </td><td id="result_indiensttreding">{{indiensttreding | date:'dd-MM-yyyy'}}<td></tr>
+      <tr><td>Bruto inkomen: </td><td id="result_inkomen">{{inkomen}}<td></tr>
+      <tr><td>Woonlasten: </td><td id="result_woonlasten">{{woonlasten}}<td></tr>
+      <tr><td>Woonsituatie: </td><td id="result_woonsituatie">{{woonsituatie}}<td></tr>
+      <tr><td>Burgerlijke staat: </td><td id="result_staat">{{staat}}<td></tr>
+      <tr ng-show="samen && staat=='getrouwd'"><td>Naam partner: </td><td id="result_naampartner">{{naampartner}}<td></tr>
+      <tr ng-show="samen && staat=='getrouwd'"><td>Geslacht partner: </td><td id="result_geslachtpartner">{{geslachtpartner}}<td></tr>
+      <tr ng-show="samen && staat=='getrouwd'"><td>Geboortedatum partner: </td><td id="result_geboortedatumpartner">{{geboortedatumpartner  | date:'dd-MM-yyyy'}}<td></tr>
+      <tr><td>Type inkomen: </td><td id="result_typeinkomen">{{typeinkomen}}<td></tr>
+    </table>
+    <div>
+      <p/>
+    </div>
+    <button class="btn btn-default" ng-click="page='3'" id="terugPage4">Ga terug naar persoonsgegevens</button>
+    <button class="btn btn-default" ng-click="page='5'" id="verderPage4">Ga verder naar enquete</button>
+  </div>
+
+  <div ng-hide="page!=5">
+    <h2 id="enqueteheader">Enquete</h2>
+    <p id="watvonduervan">Wat vond u van dit formulier?</p>
+    <form role="form" name="form4" novalidate>
+      <div class="form-group">
+        <input type="radio" name="enquete" value="ja" id="ja" ng-model="enquete"/>
+        <label for="ja">Wheeee!</label><br/>
+        <input type="radio" name="enquete" value="nee" id="nee" ng-model="enquete"/>
+        <label for="nee">Meh.</label><br/>
+        <textarea placeholder="Waarom dan?" id="waaromdan"></textarea>
+      </div>
+    </form>
+
+    <button class="btn btn-default" ng-click="page='6';submit()" id="verderPage5">Opslaan</button>
+
+  </div>
+
+  <div ng-hide="page!=6">
+    <h2 id="bedanktvooraanvraag">Bedankt voor uw aanvraag!</h2>
+    <p/>
+  </div>
+</div>
+
+<script>
+    var bdd = angular.module('bdd', []);
+
+    bdd.controller('MainCtrl', function ($scope) {
+        $scope.showModal = false;
+        $scope.page=1;
+        $scope.toggleModal = function(tekst){
+            $scope.showModal = !$scope.showModal;
+            $scope.tekst=tekst;
+        };
+        $scope.age = function(geboortedatum){
+            return (Date.now()-Date.parse(geboortedatum))/(365.25*24*3600000);
+        };
+    });
+
+    bdd.directive('modal', function () {
+        return {
+            template: '<div class="modal fade">' +
+            '<div class="modal-dialog">' +
+            '<div class="modal-content">' +
+            '<div class="modal-header">' +
+            '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+            '<h4 class="modal-title">{{ title }}</h4>' +
+            '</div>' +
+            '<div class="modal-body" ng-transclude></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>',
+            restrict: 'E',
+            transclude: true,
+            replace:true,
+            scope:true,
+            link: function postLink(scope, element, attrs) {
+                scope.title = attrs.title;
+
+                scope.$watch(attrs.visible, function(value){
+                    if(value == true)
+                        $(element).modal('show');
+                    else
+                        $(element).modal('hide');
+                });
+
+                $(element).on('shown.bs.modal', function(){
+                    scope.$apply(function(){
+                        scope.$parent[attrs.visible] = true;
+                    });
+                });
+
+                $(element).on('hidden.bs.modal', function(){
+                    scope.$apply(function(){
+                        scope.$parent[attrs.visible] = false;
+                    });
+                });
+            }
+        };
+    });
+</script>
+</body>
+</html>
